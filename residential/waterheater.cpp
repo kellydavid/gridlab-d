@@ -760,6 +760,13 @@ TIMESTAMP waterheater::sync(TIMESTAMP t0, TIMESTAMP t1)
 	double nHours = (gl_tohours(t1) - gl_tohours(t0))/TS_SECOND;
 	double Tamb = get_Tambient(location);
 	int i = 0;
+
+	if(Tw < tank_setpoint){
+		re_override = OV_ON;
+	}else{
+		re_override = OV_OFF;
+	}
+
 	// use re_override to control heat_needed state
 	// runs after thermostat() but before "the usual" calculations
 	if(current_model != FORTRAN){
@@ -909,17 +916,14 @@ TIMESTAMP waterheater::sync(TIMESTAMP t0, TIMESTAMP t1)
 
 //	gl_enduse_sync(&(residential_enduse::load),t1);
 	if(current_model != FORTRAN){
-		if(re_override == OV_NORMAL){
-			if (time_to_transition >= (1.0/3600.0))	// 0.0167 represents one second
-			{
-				TIMESTAMP t_to_trans = (TIMESTAMP)(t1+time_to_transition*3600.0/TS_SECOND);
-				return -(t_to_trans); // negative means soft transition
-			}
-			// less than one second means never
-			else
-				return TS_NEVER;
-		} else {
-			return TS_NEVER; // keep running until the forced state ends
+		if (time_to_transition >= (1.0/3600.0))	// 0.0167 represents one second
+		{
+			TIMESTAMP t_to_trans = (TIMESTAMP)(t1+time_to_transition*3600.0/TS_SECOND);
+			return -(t_to_trans); // negative means soft transition
+		}
+		// less than one second means never
+		else{
+			return TS_NEVER;
 		}
 	} else {
 		if(fwh_sim_time < t2){
