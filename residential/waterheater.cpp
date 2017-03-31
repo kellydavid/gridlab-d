@@ -761,6 +761,11 @@ TIMESTAMP waterheater::sync(TIMESTAMP t0, TIMESTAMP t1)
 	double Tamb = get_Tambient(location);
 	int i = 0;
 
+
+	/* This is to simulate the type of actions an ai agent may perform
+	 * in order to force the water heater to be either completely 'on' or
+	 * completely 'off'.
+	 *  */
 	if(Tw < tank_setpoint){
 		re_override = OV_ON;
 	}else{
